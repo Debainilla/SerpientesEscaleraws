@@ -7,14 +7,23 @@
   <link rel="stylesheet" href="css/styles.css">
   <script type="module" src="js/main.js" defer></script>
 </head>
-<body data-phase="idle" data-player="1">
+<body data-phase="menu" data-player="1" data-scenario="selva" class="theme-selva">
   <header class="hero">
     <p class="hero__eyebrow">Juego de mesa clásico</p>
     <h1 class="hero__title">Serpientes y Escaleras</h1>
     <p class="hero__copy">Dos jugadores, cien casillas y un único objetivo: llegar exacto a la meta.</p>
   </header>
 
-  <main class="game">
+  <main>
+  <section class="start-screen js-start-screen" aria-labelledby="start-title">
+    <div class="start-screen__card">
+      <h2 id="start-title" class="start-screen__title">Elige un escenario</h2>
+      <p class="start-screen__copy">Selecciona uno de los tres escenarios para comenzar la partida.</p>
+      <div class="start-screen__actions js-scenario-actions"></div>
+    </div>
+  </section>
+
+  <div class="game js-game is-hidden">
     <section class="board-panel" aria-labelledby="board-title">
       <h2 id="board-title" class="visually-hidden">Tablero de juego</h2>
       <div class="board-shell">
@@ -65,6 +74,7 @@
         <div class="controls">
           <button class="button button--primary js-roll" type="button">Tirar dado</button>
           <button class="button button--secondary js-reset" type="button">Reiniciar</button>
+          <button class="button button--secondary js-change-scenario" type="button">Cambiar escenario</button>
         </div>
       </section>
 
@@ -90,6 +100,7 @@
 
       <p class="rules">Para ganar debes caer exacto en la casilla 100. Si el dado te hace pasarte, no mueves.</p>
     </aside>
+  </div>
   </main>
 
   <p class="js-announcer visually-hidden" aria-live="polite" aria-atomic="true"></p>

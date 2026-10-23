@@ -1,4 +1,5 @@
 import { BOARD_SIZE, DICE_MAX } from "./game.js";
+import { SCENARIOS } from "./scenarios.js";
 
 const SVG_NS = "http://www.w3.org/2000/svg";
 const GRID_SIZE = 10;
@@ -111,6 +112,21 @@ function createLadder(source, target) {
 }
 
 export function createInterface(boardData) {
+  const scenarioActions = document.querySelector(".js-scenario-actions");
+
+  if (!scenarioActions) {
+    throw new Error("No se encontró el contenedor de escenarios.");
+  }
+
+  Object.values(SCENARIOS).forEach((scenario) => {
+    const button = document.createElement("button");
+    button.className = "button button--primary js-scenario-select";
+    button.type = "button";
+    button.dataset.scenario = scenario.id;
+    button.textContent = scenario.name;
+    scenarioActions.append(button);
+  });
+
   const dom = {
     board: document.querySelector(".js-board"),
     boardShell: document.querySelector(".board-shell"),
@@ -119,6 +135,11 @@ export function createInterface(boardData) {
     counterDigits: [...document.querySelectorAll(".js-counter-digit")],
     rollButton: document.querySelector(".js-roll"),
     resetButton: document.querySelector(".js-reset"),
+    changeScenarioButton: document.querySelector(".js-change-scenario"),
+    scenarioActions,
+    scenarioButtons: [...document.querySelectorAll(".js-scenario-select")],
+    startScreen: document.querySelector(".js-start-screen"),
+    game: document.querySelector(".js-game"),
     turnStatus: document.querySelector(".js-turn-status"),
     announcer: document.querySelector(".js-announcer"),
     playerCards: [...document.querySelectorAll(".js-player")],
@@ -133,71 +154,94 @@ export function createInterface(boardData) {
     dom.counterDigits.length !== 2 ||
     !dom.rollButton ||
     !dom.resetButton ||
+    !dom.changeScenarioButton ||
+    dom.scenarioButtons.length !== 3 ||
+    !dom.startScreen ||
+    !dom.game ||
     !dom.turnStatus ||
     !dom.announcer
   ) {
     throw new Error("No se encontraron los elementos principales de la interfaz.");
   }
 
-  const boardFragment = document.createDocumentFragment();
+  let boardSvg = null;
+  let activeCell = null;
 
-  for (let cellNumber = 1; cellNumber <= BOARD_SIZE; cellNumber += 1) {
-    const geometry = getCellGeometry(cellNumber);
-    const cell = document.createElement("li");
-    const number = document.createElement("span");
-    const snakeTarget = boardData.snakes[cellNumber];
-    const ladderTarget = boardData.ladders[cellNumber];
-    let accessibleLabel = `Casilla ${cellNumber}`;
-
-    cell.className = "board__cell";
-    cell.dataset.cell = String(cellNumber);
-    cell.dataset.row = String(geometry.row);
-    cell.dataset.col = String(geometry.column);
-
-    if (snakeTarget !== undefined) {
-      cell.dataset.effect = "snake";
-      accessibleLabel += `, serpiente a ${snakeTarget}`;
-    } else if (ladderTarget !== undefined) {
-      cell.dataset.effect = "ladder";
-      accessibleLabel += `, escalera a ${ladderTarget}`;
-    }
-
-    if (cellNumber === BOARD_SIZE) {
-      accessibleLabel += ", meta";
-    }
-
-    cell.setAttribute("aria-label", accessibleLabel);
-
-    number.className = "board__number";
-    number.textContent = String(cellNumber);
-    number.setAttribute("aria-hidden", "true");
-
-    cell.append(number);
-    boardFragment.append(cell);
+  function getCell(position) {
+    return dom.board.querySelector(`[data-cell="${position}"]`);
   }
 
-  dom.board.append(boardFragment);
+  function buildBoard(data) {
+    if (boardSvg) {
+      boardSvg.remove();
+      boardSvg = null;
+    }
 
-  const svg = createSvgElement("svg");
-  svg.setAttribute("class", "board__paths");
-  svg.setAttribute("viewBox", "0 0 10 10");
-  svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
-  svg.setAttribute("aria-hidden", "true");
-  svg.setAttribute("focusable", "false");
+    dom.board.replaceChildren();
 
-  Object.entries(boardData.snakes).forEach(([source, target]) => {
-    createSnake(source, target).forEach((element) => {
-      svg.append(element);
+    const boardFragment = document.createDocumentFragment();
+
+    for (let cellNumber = 1; cellNumber <= BOARD_SIZE; cellNumber += 1) {
+      const geometry = getCellGeometry(cellNumber);
+      const cell = document.createElement("li");
+      const number = document.createElement("span");
+      const snakeTarget = data.snakes[cellNumber];
+      const ladderTarget = data.ladders[cellNumber];
+      let accessibleLabel = `Casilla ${cellNumber}`;
+
+      cell.className = "board__cell";
+      cell.dataset.cell = String(cellNumber);
+      cell.dataset.row = String(geometry.row);
+      cell.dataset.col = String(geometry.column);
+
+      if (snakeTarget !== undefined) {
+        cell.dataset.effect = "snake";
+        accessibleLabel += `, serpiente a ${snakeTarget}`;
+      } else if (ladderTarget !== undefined) {
+        cell.dataset.effect = "ladder";
+        accessibleLabel += `, escalera a ${ladderTarget}`;
+      }
+
+      if (cellNumber === BOARD_SIZE) {
+        accessibleLabel += ", meta";
+      }
+
+      cell.setAttribute("aria-label", accessibleLabel);
+
+      number.className = "board__number";
+      number.textContent = String(cellNumber);
+      number.setAttribute("aria-hidden", "true");
+
+      cell.append(number);
+      boardFragment.append(cell);
+    }
+
+    dom.board.append(boardFragment);
+
+    const svg = createSvgElement("svg");
+    svg.setAttribute("class", "board__paths");
+    svg.setAttribute("viewBox", "0 0 10 10");
+    svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("focusable", "false");
+
+    Object.entries(data.snakes).forEach(([source, target]) => {
+      createSnake(source, target).forEach((element) => {
+        svg.append(element);
+      });
     });
-  });
 
-  Object.entries(boardData.ladders).forEach(([source, target]) => {
-    createLadder(source, target).forEach((element) => {
-      svg.append(element);
+    Object.entries(data.ladders).forEach(([source, target]) => {
+      createLadder(source, target).forEach((element) => {
+        svg.append(element);
+      });
     });
-  });
 
-  dom.boardShell.append(svg);
+    boardSvg = svg;
+    dom.boardShell.append(svg);
+  }
+
+  buildBoard(boardData);
 
   const tokens = [1, 2].map((playerNumber) => {
     const token = document.createElement("span");
@@ -210,14 +254,43 @@ export function createInterface(boardData) {
     return token;
   });
 
-  let activeCell = null;
-
-  function getCell(position) {
-    return dom.board.querySelector(`[data-cell="${position}"]`);
-  }
-
   function getActivePlayer(state) {
     return state.phase === "won" ? state.winner : state.turn + 1;
+  }
+
+  let activeThemeClass =
+    [...document.body.classList].find((className) => className.startsWith("theme-")) ??
+    null;
+
+  function setScenario(scenario) {
+    document.body.dataset.scenario = scenario.id;
+
+    if (activeThemeClass) {
+      document.body.classList.remove(activeThemeClass);
+    }
+
+    document.body.classList.add(scenario.themeClass);
+    activeThemeClass = scenario.themeClass;
+    dom.board.setAttribute(
+      "aria-label",
+      `Tablero de 100 casillas del escenario ${scenario.name}`,
+    );
+    buildBoard(scenario.boardData);
+    activeCell = null;
+    tokens.forEach((token) => {
+      getCell(1).append(token);
+    });
+  }
+
+  function showMenu() {
+    document.body.dataset.phase = "menu";
+    dom.startScreen.classList.remove("is-hidden");
+    dom.game.classList.add("is-hidden");
+  }
+
+  function showGame() {
+    dom.startScreen.classList.add("is-hidden");
+    dom.game.classList.remove("is-hidden");
   }
 
   function render(state) {
@@ -322,12 +395,28 @@ export function createInterface(boardData) {
     dom.resetButton.focus();
   }
 
+  function focusMenu() {
+    dom.scenarioButtons[0].focus();
+  }
+
+  function focusRoll() {
+    dom.rollButton.focus();
+  }
+
   return {
     render,
+    setScenario,
+    showMenu,
+    showGame,
     setDiceValue,
     announce,
     focusReset,
+    focusMenu,
+    focusRoll,
     rollButton: dom.rollButton,
     resetButton: dom.resetButton,
+    changeScenarioButton: dom.changeScenarioButton,
+    scenarioActions: dom.scenarioActions,
+    scenarioButtons: dom.scenarioButtons,
   };
 }
