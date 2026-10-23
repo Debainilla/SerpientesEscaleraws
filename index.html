@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Serpientes y Escaleras</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <script type="module" src="js/main.js" defer></script>
+</head>
+<body data-phase="idle" data-player="1">
+  <header class="hero">
+    <p class="hero__eyebrow">Juego de mesa clásico</p>
+    <h1 class="hero__title">Serpientes y Escaleras</h1>
+    <p class="hero__copy">Dos jugadores, cien casillas y un único objetivo: llegar exacto a la meta.</p>
+  </header>
+
+  <main class="game">
+    <section class="board-panel" aria-labelledby="board-title">
+      <h2 id="board-title" class="visually-hidden">Tablero de juego</h2>
+      <div class="board-shell">
+        <ol id="board" class="board js-board" aria-label="Tablero de 100 casillas"></ol>
+      </div>
+    </section>
+
+    <aside class="side-panel" aria-labelledby="status-title">
+      <section class="status-card" aria-labelledby="status-title">
+        <h2 id="status-title" class="status-card__title">Turno</h2>
+        <p class="status-card__turn js-turn-status">Turno del Jugador 1</p>
+
+        <div class="dice-card" aria-hidden="true">
+          <span class="dice-card__label">Dado</span>
+          <span class="die js-die" data-value="0">
+            <span class="die__pip"></span>
+            <span class="die__pip"></span>
+            <span class="die__pip"></span>
+            <span class="die__pip"></span>
+            <span class="die__pip"></span>
+            <span class="die__pip"></span>
+            <span class="die__pip"></span>
+            <span class="die__pip"></span>
+            <span class="die__pip"></span>
+          </span>
+          <span class="counter js-counter">
+            <span class="counter__digit js-counter-digit" data-digit="0">
+              <span class="counter__segment counter__segment--a is-on" data-segment="a"></span>
+              <span class="counter__segment counter__segment--b is-on" data-segment="b"></span>
+              <span class="counter__segment counter__segment--c is-on" data-segment="c"></span>
+              <span class="counter__segment counter__segment--d is-on" data-segment="d"></span>
+              <span class="counter__segment counter__segment--e is-on" data-segment="e"></span>
+              <span class="counter__segment counter__segment--f is-on" data-segment="f"></span>
+              <span class="counter__segment counter__segment--g" data-segment="g"></span>
+            </span>
+            <span class="counter__digit js-counter-digit" data-digit="0">
+              <span class="counter__segment counter__segment--a is-on" data-segment="a"></span>
+              <span class="counter__segment counter__segment--b is-on" data-segment="b"></span>
+              <span class="counter__segment counter__segment--c is-on" data-segment="c"></span>
+              <span class="counter__segment counter__segment--d is-on" data-segment="d"></span>
+              <span class="counter__segment counter__segment--e is-on" data-segment="e"></span>
+              <span class="counter__segment counter__segment--f is-on" data-segment="f"></span>
+              <span class="counter__segment counter__segment--g" data-segment="g"></span>
+            </span>
+          </span>
+        </div>
+
+        <div class="controls">
+          <button class="button button--primary js-roll" type="button">Tirar dado</button>
+          <button class="button button--secondary js-reset" type="button">Reiniciar</button>
+        </div>
+      </section>
+
+      <section class="players-card" aria-labelledby="players-title">
+        <h2 id="players-title" class="players-card__title">Jugadores</h2>
+        <ul class="player-list">
+          <li class="player-card js-player" data-player-card="1" aria-current="true">
+            <span class="player-card__badge player-card__badge--p1" aria-hidden="true">1</span>
+            <span class="player-card__info">
+              <span class="player-card__name">Jugador 1</span>
+              <span class="player-card__position js-player-position">Salida</span>
+            </span>
+          </li>
+          <li class="player-card js-player" data-player-card="2">
+            <span class="player-card__badge player-card__badge--p2" aria-hidden="true">2</span>
+            <span class="player-card__info">
+              <span class="player-card__name">Jugador 2</span>
+              <span class="player-card__position js-player-position">Salida</span>
+            </span>
+          </li>
+        </ul>
+      </section>
+
+      <p class="rules">Para ganar debes caer exacto en la casilla 100. Si el dado te hace pasarte, no mueves.</p>
+    </aside>
+  </main>
+
+  <p class="js-announcer visually-hidden" aria-live="polite" aria-atomic="true"></p>
+</body>
+</html>
